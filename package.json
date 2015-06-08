@@ -1,0 +1,27 @@
+{
+  "name": "hq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JIoJIaJIu/hq.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JIoJIaJIu/hq/issues"
+  },
+  "homepage": "https://github.com/JIoJIaJIu/hq",
+  "dependencies": {
+    "braintree": "^1.26.0",
+    "config": "^1.14.0",
+    "hapi": "^8.6.1",
+    "paypal-rest-sdk": "^1.5.3",
+    "pg": "^4.4.0",
+    "sequelize": "^3.2.0"
+  }
+}
