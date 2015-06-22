@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
@@ -19,9 +19,20 @@
   "dependencies": {
     "braintree": "^1.26.0",
     "config": "^1.14.0",
+    "handlebars": "^3.0.3",
     "hapi": "^8.6.1",
+    "lodash": "^3.9.3",
     "paypal-rest-sdk": "^1.5.3",
     "pg": "^4.4.0",
-    "sequelize": "^3.2.0"
+    "q": "^1.4.1",
+    "sequelize": "^3.2.0",
+    "winston": "^1.0.0"
+  },
+  "devDependencies": {
+    "bower": "^1.4.1",
+    "bower-installer": "^1.2.0",
+    "gulp": "^3.9.0",
+    "gulp-exec": "^2.1.1",
+    "gulp-jasmine": "^2.0.1"
   }
 }
