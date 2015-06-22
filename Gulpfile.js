@@ -1,8 +1,8 @@
 var gulp = require('gulp');
-var exec = require('gulp-exec');
+var exec = require('child_process').exec
 var jasmine = require('gulp-jasmine');
 
-gulp.task('default', []);
+gulp.task('default', ['deps', 'test']);
 
 gulp.task('test', function () {
     return gulp.src('test/**.js').pipe(jasmine());

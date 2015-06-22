@@ -32,7 +32,6 @@
     "bower": "^1.4.1",
     "bower-installer": "^1.2.0",
     "gulp": "^3.9.0",
-    "gulp-exec": "^2.1.1",
     "gulp-jasmine": "^2.0.1"
   }
 }
