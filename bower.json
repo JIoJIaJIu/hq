@@ -1,0 +1,22 @@
+{
+  "name": "hq",
+  "version": "0.0.0",
+  "homepage": "https://github.com/JIoJIaJIu/hq",
+  "authors": [
+    "Guro Bokum <jiojiajiu@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap": "~3.3.4"
+  },
+  "install": {
+    "path": "static"
+  }
+}
