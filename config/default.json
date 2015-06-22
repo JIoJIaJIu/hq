@@ -1,0 +1,27 @@
+{
+    "logLevel": 0,
+    "db": {
+    },
+    "payments": {
+        "braintree": {
+            "publicKey": "yznbhc2fr8cby95j",
+            "privateKey": "b23221d4ec5b3fd578e9b608e6eece8f"
+        },
+        "paypal": {
+            "clientId": "Aco6p0hSxBUgc_YeZaEZc54kte1LFNUX4QVGOhLAFXzCqonGrhbU-QL21dkIeHSk5FYQOM9xkfswLvyQ",
+            "secret": "EN1eJVdFYM9yMACpj1D0W8j07El0u6-NBc367HE5pPrpEGxmhYYrSB8j50j6Mixc41piJ0NMDYytmXpv"
+        }
+    },
+
+    "ERROR_CODES": {
+        "UNDEFINED": 0, // undefined
+        "NULL_OR_ZERO": 1, // "", 0, null, undefined
+        "WRONG_TYPE": 2,
+        "WRONG_SIGN": 3,
+        "WRONG_SIZE": 4,
+        "WRONG_VALUE": 5,
+        "NOT_LATIN": 6,
+
+        "WRONG_CURRENCY": 100
+    }
+}
