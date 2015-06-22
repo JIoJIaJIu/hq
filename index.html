@@ -1,0 +1,98 @@
+<!DOCTYPE>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf8"/>
+    <title>HQ</title>
+    <link rel="stylesheet" href="static/bootstrap/bootstrap.css"/>
+</head>
+<body>
+<form class="form-horizontal" id="payment-form" name="yaz">
+    <h1>Payment <small>(give me your money, dude)</small></h1>
+    <div class="form-group">
+        <div class="col-sm-5">
+            <!--<span class="input-group-addon">$</span>-->
+            <input name="amount" placeholder="Enter amount" class="form-control"/>
+        </div>
+        <div class="col-sm-1">
+            <select class="form-control" name="currency">
+                <option>USD</option>
+                <option>EUR</option>
+                <option>THB</option>
+                <option>HKD</option>
+                <option>SGD</option>
+                <option>AUD</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-5">
+            <input name="fullName" placeholder="Enter your full name" class="form-control"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-5">
+            <input name="cardNumber" placeholder="Enter your card number" class="form-control"/>
+        </div>
+        <div class="col-sm-1">
+            <input name="ccv" placeholder="CCV" class="form-control"/>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-sm-5">
+            <input name="holderName" placeholder="Enter card holder full name" class="form-control"/>
+        </div>
+        <div class="col-sm-1">
+            <select class="form-control" name="expMonth">
+                <option>01</option>
+                <option>02</option>
+                <option>03</option>
+                <option>04</option>
+                <option>05</option>
+                <option>06</option>
+            </select>
+        </div>
+        <div class="col-sm-1">
+            <select class="form-control" name="expYear">
+                <option>2015</option>
+                <option>2016</option>
+                <option>2017</option>
+                <option>2018</option>
+                <option>2019</option>
+                <option>2020</option>
+            </select>
+        </div>
+    </div>
+    <div class="errors" class="form-group"></div>
+    <button type="submit" class="btn btn-default">Pay</button>
+</form>
+<script type="text/javascript" src="static/jquery/jquery.js"></script>
+<script type="text/javascript">
+$(function () {
+
+$('#payment-form').submit(function (e) {
+    var form = e.target;
+    e.preventDefault();
+    $.post('/payment', {
+        "price": $(form.amount).val(),
+        "currency": $(form.currency).val(),
+        "fullName": $(form.fullName).val(),
+        "holderName": $(form.holderName).val(),
+        "cardNumber": $(form.cardNumber).val(),
+        "ccv": $(form.ccv).val()
+        //"expiration": $(form.expMonth).val() + '/' $(form.expYear).val()
+    }, function (errors) {
+        showErrors(errors);
+    });
+});
+
+function showErrors(errors) {
+    var nodes = $.map(errors, function (error) {
+        return $('<div/>').text(error.msg);
+    });
+    $('.errors').html(nodes);
+}
+
+});
+</script>
+</body>
+</html>
