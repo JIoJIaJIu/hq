@@ -14,14 +14,15 @@ describe("Paypal payment", function () {
             holderLastName: "Shopper",
             price: 7,
             currency: "USD"
-        }).then(function (error, payment) {
-            expect(error).toBe(null);
-            done();
-        });
+        }).then(function (payment) {
+            expect(true).toBe(true);
+        }, function () {
+            expect(false).toBe(true);
+        }).fin(done);
     });
 
     it("unvalid credit card payment", function (done) {
-        paypal.createPayment("card", {amount: 33})
+        paypal.createPayment("card", {amount: 33, type: "asiv"})
             .then(function (error) {
                 expect(!!error).toBe(true);
                 done();
