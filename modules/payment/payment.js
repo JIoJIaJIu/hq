@@ -2,18 +2,19 @@ var _ = require('lodash');
 var Q = require('q');
 var logger = require('winston');
 var config = require('config');
+var md5 = require('md5');
 
 var paypal = require('./paypal');
 var braintree = require('./braintree');
 var utils = require('../utils');
 
 var CURRENCIES = [
-    "USD",
-    "EUR",
-    "THB",
-    "HKD",
-    "SGD",
-    "AUD"
+    'USD',
+    'EUR',
+    'THB',
+    'HKD',
+    'SGD',
+    'AUD'
 ]
 
 var ERROR_CODES = config.get('ERROR_CODES');
@@ -23,7 +24,7 @@ function PaymentService () {
         braintree: new braintree.Braintree(),
         paypal: new paypal.Paypal()
     }
-    logger.info("PaymentService was created");
+    logger.info("[Payment] PaymentService was created");
 }
 
 PaymentService.prototype = {
@@ -35,74 +36,115 @@ PaymentService.prototype = {
      * @param {Object} paymentInfo
      *   @key {String} fullName, holder full name
      *   @key {Number} cardNumber, card number
-     *   @key {String} exp, expiration
+     *   @key {Number} expMonth
+     *   @key {Number} expYear
      *   @key {Number} ccv
+     *   @key {String} [nonce]
      * @return {Object} promise
      */
     createPayment: function (orderInfo, paymentInfo) {
-        logger.info("Request new payment");
+        logger.info("[Payment] Request new payment");
         var errors = this._validateOrderInfo(orderInfo);
         _.extend(errors, this._validatePaymentInfo(paymentInfo));
         var self = this;
 
-        return Q.fcall(function () {
-            if (!_.isEmpty(errors)) {
-                logger.info("Data is not valid");
-                return errors;
+        if (!_.isEmpty(errors)) {
+            logger.info("[Payment] Data is not valid");
+            return utils.rejectedPromise(errors);
+        }
+
+        logger.info("[Payment] Data is ok");
+        var data = self._normalize(orderInfo, paymentInfo);
+        if (data.type === 'AMEX') {
+            if (data.currency !== 'USD') {
+                logger.info("[Payment] Error during processing");
+                return utils.rejectedPromise({
+                    card: utils.Error(ERROR_CODES.WRONG_CURRENCY, "AMEX is possible to use only for USD")
+                })
             }
 
-            logger.info("Data is ok");
-            var data = self._normalize(orderInfo, paymentInfo);
-            if (self.isAMEX(data.number)) {
-                if (data.currency != "USD") {
-                    logger.info("Error during processing");
-                    return {
-                        card: utils.Error(ERROR_CODES.WRONG_CURRENCY, "AMEX is possible to use only for USD")
-                    }
-                }
+            return self._services.paypal.createPayment('card', data);
+        }
 
-                return self._services.paypal.createPayment(data);
-            }
+        if (~['USD', 'EUR', 'AUD'].indexOf(data.currency))
+            return self._services.paypal.createPayment('card', data);
 
-            if (~["USD", "EUR", "AUD"].indexOf(data.currency))
-                return self._services.paypal.createPayment(data);
-
+        if (data.nonce) {
             return self._services.braintree.createPayment(data);
-        });
+        } else {
+            var def = Q.defer();
+            self._services.braintree.getClientToken(data)
+                .then(function (token) {
+                    def.resolve({
+                        isBraintree: true,
+                        token: token
+                    })
+                }, function (error) {
+                    def.reject(error);
+                })
+            return def.promise;
+        }
     },
 
     /**
-     * Determine is it American Express Card
-     * @return {Boolean}
-     */
-    isAMEX: function (number) {
-        return false;
-    },
-
+     * Works after validation
+     **/
     _normalize: function (order, payment) {
-        logger.info("Normalize payment and order datas");
+        logger.info("[Payment] Normalize payment and order datas");
         var fullNames = order.fullName.split(' ');
         var holderNames = payment.holderName.split(' ');
+        var cardNumber = parseInt(payment.cardNumber, 10);
 
         var data = {
             price: parseInt(order.price, 10),
             currency: order.currency.toUpperCase(),
-            cardNumber: parseInt(payment.cardNumber, 10),
+            cardNumber: cardNumber,
+            cardType: this._determineCardType(cardNumber),
             firstName: fullNames[0],
             lastName: fullNames[1],
             holderFirstName: holderNames[0],
             holderLastName: holderNames[1],
-            ccv: parseInt(payment.ccv, 10)
+            ccv: parseInt(payment.ccv, 10),
+
+            expMonth: payment.expMonth,
+            expYear: payment.expYear,
+
+            nonce: payment.nonce || null // optional
         }
 
         return data;
     },
 
     /**
+     * http://stackoverflow.com/questions/72768/how-do-you-detect-credit-card-type-based-on-number
+     * @ return {String}
+     * Variants:
+     *  - AMEX
+     *  - VISA
+     *  - MASTERCARD
+     *  - UNKNOWN
+     */
+    _determineCardType: function (cardNumber) {
+        var VISA_REG = /^4[0-9]{6,}$/
+        var MASTERCARD_REG = /^5[1-5][0-9]{5,}$/
+        var AMEX_REG = /^3[47][0-9]{5,}$/
+
+        if (VISA_REG.test(cardNumber)) {
+            return 'VISA';
+        } else if (MASTERCARD_REG.test(cardNumber)) {
+            return 'MASTERCARD';
+        } else if (AMEX_REG.test(cardNumber)) {
+            return 'AMEX';
+        } else {
+            return 'UNKNOWN';
+        }
+    },
+
+    /**
      * @return {Object} errors, utils.Error
      */
     _validateOrderInfo: function (orderInfo) {
-        logger.info("Validate order info");
+        logger.info("[Payment] Validate order info");
         var errors = {}
         if (_.isEmpty(orderInfo))
             return {
@@ -143,7 +185,7 @@ PaymentService.prototype = {
                                              "Should point currency in " + CURRENCIES.join(','));
         }
 
-        logger.info("Errors: ", errors);
+        logger.info("[Payment] Errors: ", errors);
         return errors;
     },
 
@@ -151,7 +193,7 @@ PaymentService.prototype = {
      * @return {Object} errors, utils.Error
      */
     _validatePaymentInfo: function (paymentInfo) {
-        logger.info("Validate payment info");
+        logger.info("[Payment] Validate payment info");
         var errors = {}
         if (_.isEmpty(paymentInfo))
             return {
@@ -197,7 +239,7 @@ PaymentService.prototype = {
         } else if ((ccv + '').length != 3) {
             errors['ccv'] = utils.Error(ERROR_CODES.WRONG_SIZE,
                                         "Ccv should be 3 letters");
-        } else if (!utils.isNumberic(ccv)) {
+        } else if (!utils.isNumeric(ccv)) {
             errors['ccv'] = utils.Error(ERROR_CODES.WRONG_TYPE,
                                         "Ccv should be decimal(0-9) letters");
         }
@@ -205,7 +247,7 @@ PaymentService.prototype = {
         @key {String} exp, expiration
         */
 
-        logger.info("Errors: ", errors);
+        logger.info("[Payment] Errors: ", errors);
         return errors;
     }
 }

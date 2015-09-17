@@ -1,4 +1,6 @@
 var _ = require('lodash');
+var Q = require('q');
+var md5 = require('md5');
 
 module.exports = {
     /**
@@ -40,5 +42,20 @@ module.exports = {
             msg: msg,
             datetime: new Date()
         }
+    },
+
+    generateCardHash: function (cardNumber, ccv) {
+        return md5(cardNumber + "/" + ccv);
+    },
+
+    generateCustomerId: function (firstName, lastName) {
+        return firstName + "_" + lastName
+    },
+
+    rejectedPromise: function (data) {
+        var def = Q.defer();
+        def.reject(data);
+        return def.promise;
     }
+    
 }
