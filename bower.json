@@ -17,6 +17,11 @@
     "bootstrap": "~3.3.4"
   },
   "install": {
-    "path": "static"
+    "path": "static",
+    "sources": {
+        "bootstrap": [
+            "bower_components/bootstrap/dist/css/bootstrap.css"
+        ]
+    }
   }
 }
