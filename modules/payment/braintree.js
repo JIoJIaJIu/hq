@@ -36,7 +36,8 @@ Braintree.prototype = {
                         return;
                     }
 
-                    def.resolve(response.id);
+                    var transaction = response.transaction;
+                    def.resolve(transaction.id);
                 })
             });
 
