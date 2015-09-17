@@ -4,6 +4,8 @@ var config = require('config');
 
 var ERROR_CODES = config.get('ERROR_CODES');
 
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000
+
 describe("Payment create payment validation", function () {
     var orderInfo = {
         price: 100,
@@ -12,25 +14,17 @@ describe("Payment create payment validation", function () {
     };
 
     var paymentInfo = {
-        holderName: "Freeda Burn"
+        holderName: "Freeda Burn",
         cardNumber: 55122311251294812,
         ccv: 115
     };
-
-    it("right request", function (done) {
-        service.createPayment(orderInfo, paymentInfo)
-            .then(function (error) {
-                expect(error).toBe(null);
-                done();
-            });
-    });
 
     it("wrong price: not pointed", function (done) {
         var order = _.clone(orderInfo);
         delete order.price;
         service.createPayment(order, paymentInfo)
             .then(function (error) {
-                expect(error.order['price'].code).toBe(ERROR_CODES.NULL_OR_ZERO);
+                expect(error['price'].code).toBe(ERROR_CODES.NULL_OR_ZERO);
                 done();
             });
     });
@@ -40,7 +34,7 @@ describe("Payment create payment validation", function () {
         order.price = "asdf";
         service.createPayment(order, paymentInfo)
             .then(function (error) {
-                expect(error.order['price'].code).toBe(ERROR_CODES.WRONG_TYPE);
+                expect(error['price'].code).toBe(ERROR_CODES.WRONG_TYPE);
                 done();
             });
     });
@@ -50,8 +44,27 @@ describe("Payment create payment validation", function () {
         order.price = -1000;
         service.createPayment(order, paymentInfo)
             .then(function (error) {
-                expect(error.order['price'].code).toBe(ERROR_CODES.WRONG_SIGN);
+                expect(error['price'].code).toBe(ERROR_CODES.WRONG_SIGN);
                 done();
+        });
+    });
+});
+
+describe("Create payments", function () {
+    it("Paypal payment", function (done) {
+        service.createPayment({
+            price: 100,
+            currency: "USD",
+            fullName: "Anrick Burn",
+        }, {
+            holderName: "Joe Shopper",
+            cardNumber: 4417119669820331,
+            ccv: 874,
+            expMonth: 11,
+            expYear: 2018
+        }).then(function (error, payment) {
+            expect(error).toBe(null);
+            done();
         });
     });
 });
