@@ -22,10 +22,8 @@ Paypal.prototype = {
         }
 
         var def = Q.defer();
-        console.log(this._getPaymentJSON(type, data));
         paypal.payment.create(this._getPaymentJSON(type, data), function (error, payment) {
             logger.info("[Paypal] Payment was created");
-            console.log('error, payment', error, payment);
             if (error) {
                 def.reject(self._formatError(error));
                 return;

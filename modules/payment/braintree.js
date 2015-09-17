@@ -78,7 +78,6 @@ Braintree.prototype = {
             customerId: customer.id,
             paymentMethodNonce: nonce
         }, function (err, paymentMethod) {
-            console.log(6, err, paymentMethod);
             if (err) {
                 logger.error("[Braintree] Error during creating payment method")
                 def.reject(err)
