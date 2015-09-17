@@ -22,10 +22,11 @@ describe("Paypal payment", function () {
     });
 
     it("unvalid credit card payment", function (done) {
-        paypal.createPayment("card", {amount: 33, type: "asiv"})
+        paypal.createPayment("card", {amount: 33, cardType: "asiv"})
             .then(function (error) {
-                expect(!!error).toBe(true);
-                done();
-            });
+                expect(false).toBe(true);
+            }, function () {
+                expect(true).toBe(true);
+            }).fin(done);
     });
 })
