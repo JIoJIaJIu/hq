@@ -23,30 +23,27 @@ describe("Payment create payment validation", function () {
         var order = _.clone(orderInfo);
         delete order.price;
         service.createPayment(order, paymentInfo)
-            .then(function (error) {
+            .fail(function (error) {
                 expect(error['price'].code).toBe(ERROR_CODES.NULL_OR_ZERO);
-                done();
-            });
+            }).fin(done);
     });
 
     it("wrong price: asdf", function (done) {
         var order = _.clone(orderInfo);
         order.price = "asdf";
         service.createPayment(order, paymentInfo)
-            .then(function (error) {
+            .fail(function (error) {
                 expect(error['price'].code).toBe(ERROR_CODES.WRONG_TYPE);
-                done();
-            });
+            }).fin(done);
     });
 
     it("wrong price: -1000", function (done) {
         var order = _.clone(orderInfo);
         order.price = -1000;
         service.createPayment(order, paymentInfo)
-            .then(function (error) {
+            .fail(function (error) {
                 expect(error['price'].code).toBe(ERROR_CODES.WRONG_SIGN);
-                done();
-        });
+        }).fin(done);
     });
 });
 
@@ -62,9 +59,10 @@ describe("Create payments", function () {
             ccv: 874,
             expMonth: 11,
             expYear: 2018
-        }).then(function (error, payment) {
-            expect(error).toBe(null);
-            done();
-        });
+        }).then(function (payment) {
+            expect(true).toBe(true);
+        }, function () {
+            expect(false).toBe(true);
+        }).fin(done);
     });
 });
